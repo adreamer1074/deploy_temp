@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  api-ci4:
+    build:
+      context: ./api-ci4
+      dockerfile: Dockerfile
+    container_name: api-ci4
+    ports:
+      - "8081:80"
+    privileged: true        # systemd 
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./api-ci4:/var/www/html/api-ci4  # ローカルの設定です。本番の場合、変更してください
+
+    restart: always
+    networks:
+      - appnet
+
+  spa-angular:
+    build:
+      context: ./spa-angular
+      dockerfile: Dockerfile
+    container_name: spa-angular
+    ports:
+      - "8080:80"
+    privileged: true        # systemd 
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./spa-angular:/var/www/html/spa-angular  # ローカルの設定です。本番の場合、変更してください
+    restart: always
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
