@@ -1,37 +1,58 @@
-version: "3.9"
-
+version: "3.8"
 services:
-  api-ci4:
+  callweb-api:
     build:
-      context: ./api-ci4
-      dockerfile: Dockerfile
-    container_name: api-ci4
+      context: ./docker/callweb-api
+    image: callweb-api:latest
+    container_name: callweb-api
     ports:
       - "8081:80"
-    privileged: true        # systemd 
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./api-ci4:/var/www/html/api-ci4  # ローカルの設定です。本番の場合、変更してください
-
+      - ./html/pl_api_ci4:/var/www/callweb-api
+      - ./log/ap:/var/www/callweb-api/log/ap
+      - ./log/ap_ex:/var/www/callweb-api/log/ap_ex
+    environment:
+      - TZ=Asia/Tokyo
     restart: always
     networks:
-      - appnet
+      - callweb-net
 
-  spa-angular:
+  callweb-spa:
     build:
-      context: ./spa-angular
-      dockerfile: Dockerfile
-    container_name: spa-angular
+      context: ./docker/callweb-spa
+    image: callweb-spa:latest
+    container_name: callweb-spa
     ports:
       - "8080:80"
-    privileged: true        # systemd 
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./spa-angular:/var/www/html/spa-angular  # ローカルの設定です。本番の場合、変更してください
+      - ./html/pl_web:/var/www/callweb-spa/www/html
+    environment:
+      - TZ=Asia/Tokyo
     restart: always
     networks:
-      - appnet
+      - callweb-net
+
+  link_db: #local mysql
+    image: mysql:8.0
+    container_name: "link_db"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pl_gyodb
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      TZ: "Asia/Tokyo"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - "3306:3306"
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    networks:
+      - callweb-net
 
 networks:
-  appnet:
+  callweb-net:
     driver: bridge
