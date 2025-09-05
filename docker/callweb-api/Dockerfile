@@ -29,4 +29,8 @@ WORKDIR /var/www/callweb-api
 
 EXPOSE 80
 
-CMD ["/bin/bash", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["bash", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+
+# コマンドを使用出来るようにする
+# 本番はsupervisordを使っている。これを使用。設定はsupervisord.confに。
+# CMD ["/sbin/init"] 

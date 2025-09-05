@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.8"
 services:
   callweb-api:
     build:
@@ -7,7 +7,7 @@ services:
     container_name: callweb-api
     ports:
       - "8081:80"
-    volumes:
+    volumes: #ローカルのソースコードをコンテナにマウント（本番ではDockerfileにCOPYを使った方がいい気がする。）
       - /etc/localtime:/etc/localtime:ro
       - ./html/pl_api_ci4:/var/www/callweb-api
       - ./log/ap:/var/www/callweb-api/log/ap
@@ -25,9 +25,11 @@ services:
     container_name: callweb-spa
     ports:
       - "8080:80"
+      - "4200:4200"     
+
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./html/pl_web:/var/www/callweb-spa/www/html
+      - ./html/pl_web:/var/www/callweb-spa
     environment:
       - TZ=Asia/Tokyo
     restart: always

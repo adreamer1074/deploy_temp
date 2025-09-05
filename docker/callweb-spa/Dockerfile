@@ -2,31 +2,27 @@ FROM amazonlinux:2023
 
 ENV TZ=Asia/Tokyo
 
-# 必要パッケージ + PHP 8.3 + Nginx
 RUN yum -y update && \
-    yum -y install nginx php8.3 php8.3-{cli,fpm,mysqlnd,zip,devel,gd,mbstring,xml,bcmath,intl} unzip git && \
+    yum -y install nginx unzip git && \
     yum clean all
 
-# Node.js 20.xインストール（ここが重要！）
-RUN curl -sL https://rpm.nodesource.com/setup_20.x | bash -
+# Node.js & Angular CLI
+RUN curl -sL https://rpm.nodesource.com/setup_16.x | bash -
 RUN yum -y install nodejs
-
-WORKDIR /var/www/callweb-spa
-
-# 必要なら Angular CLI (グローバル)
 RUN npm install -g @angular/cli@16.2.10
 
-# Nginx設定
-COPY ./nginx.conf /etc/nginx/nginx.conf
-COPY ./spa-nginx.conf /etc/nginx/conf.d/spa-nginx.conf
+# マウントされるディレクトリ
+WORKDIR /var/www/callweb-spa     
+# Angular dev server用
+EXPOSE 4200                      
+# Nginx用
+EXPOSE 80                        
 
-# .htpasswd（必要ならコピー）
-COPY ./.htpasswd /etc/nginx/.htpasswd
+# Nginx設定（自分のDockerfileと同じディレクトリから）
+# COPY spa-nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN mkdir -p /run/php-fpm && chown nginx:nginx /run/php-fpm
+# distをNginxの公開ディレクトリに配置
+# RUN cp -r /app/dist/* /usr/share/nginx/html/
 
 
-EXPOSE 80
-
-# PHP-FPMとNginxを両方起動
-CMD ["/bin/bash", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["nginx", "-g", "daemon off;"]
